@@ -74,17 +74,17 @@ This is an early version of this module. It uses C<Devel::Declare> which while i
 
 =head1 OPTIONS
 
-Most of the magic in this module is performed when the module is loaded (C<use PDL::DeclareSlice>). Options may be passed at this point (or when calling the C<import> method). These options are passed as a hashref to the C<use> or <import> (i.e., C<use PDL::DeclareSlice {key => value}>) method and are as follows:
+Most of the magic in this module is performed when the module is loaded (C<use PDL::DeclareSlice>). Options may be passed at this point (or when calling the C<import> method). These options are passed as a hashref to the C<use> or C<import> (i.e., C<< use PDL::DeclareSlice {key => value} >>) method and are as follows:
 
 =over
 
 =item *
 
-verbose - If set to true will print (some) debug info, most importantly the post-parse resultant line of code. Defaults to false.
+C<verbose> - If set to true will print (some) debug info, most importantly the post-parse resultant line of code. Defaults to false.
 
 =item *
 
-keyword - String which will define the keyword which invokes the slice. By default this is C<sl>.
+C<keyword> - String which will define the keyword which invokes the slice. By default this is C<sl>.
 
 =back
 
