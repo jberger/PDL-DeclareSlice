@@ -1,6 +1,6 @@
 use Test::More;
 
-use_ok( 'PDL' );
+use PDL;
 use PDL::DeclareSlice;
 
 my $stuff = xvals(5);
