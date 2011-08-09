@@ -66,6 +66,28 @@ PDL::DeclareSlice - An alternative to L<PDL::NiceSlice> using L<Devel::Declare>.
 
 =head1 DESCRIPTION
 
+Adds a keyword (of your choosing, by default C<sl>) which triggers slicing of a PDL object. The slice spec will be enclosed in double quotes, so no quotes are needed.
+
+=head1 PRE-ALPHA!!!
+
+This is an early version of this module. It uses C<Devel::Declare> which while it is not a source filter still uses some deep magic which may have serious issues. You are invited to file bugs and patch. I also welcome any thoughts on how to improve it.
+
+=head1 OPTIONS
+
+Most of the magic in this module is performed when the module is loaded (C<use PDL::DeclareSlice>). Options may be passed at this point (or when calling the C<import> method). These options are passed as a hashref to the C<use> or <import> (i.e., C<use PDL::DeclareSlice {key => value}>) method and are as follows:
+
+=over
+
+=item *
+
+verbose - If set to true will print (some) debug info, most importantly the post-parse resultant line of code. Defaults to false.
+
+=item *
+
+keyword - String which will define the keyword which invokes the slice. By default this is C<sl>.
+
+=back
+
 =head1 SOURCE REPOSITORY
 
 L<http://github.com/jberger/PDL-DeclareSlice>
