@@ -31,24 +31,33 @@ sub import {
 }
 
 sub parser {
+  # get the current buffer
   my $linestr = Devel::Declare::get_linestr;
+
+  # find the keyword in the current buffer
   my ($before, $after) = split(/\b$keyword\b/, $linestr, 2);
 
+  # find the variable after the keyword
   my ($variable, $ws);
   ($variable, $after, $ws) = extract_variable($after);
   my $invocant = $keyword . $ws . $variable;
 
+  # determine where to start the search for the matched braces for the slice
   my $invocant_start = index( $linestr, $keyword . $ws . $variable );
 
+  # using D::D, load enough strings into the buffer to contain the slice
   my $slice_length = Devel::Declare::toke_scan_str($invocant_start + length $invocant);
   my $slice = Devel::Declare::get_lex_stuff;
   Devel::Declare::clear_lex_stuff;
 
+  # allow findslice to operate on a more localized region
   my $nslice = PDL::NiceSlice::findslice( "$variable($slice)" );
 
+  # refresh the buffer in preparation for the replacement
   $linestr = Devel::Declare::get_linestr;
-  substr $linestr, $invocant_start, $slice_length + length $invocant, "$keyword($nslice)";
 
+  # replace
+  substr $linestr, $invocant_start, $slice_length + length $invocant, "$keyword($nslice)";
   Devel::Declare::set_linestr($linestr);
 }
 
