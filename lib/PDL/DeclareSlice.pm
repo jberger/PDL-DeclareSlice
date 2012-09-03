@@ -3,7 +3,7 @@ package PDL::DeclareSlice;
 use strict;
 use warnings;
 
-use Text::Balanced qw/extract_bracketed extract_variable/;
+use Text::Balanced qw/extract_variable/;
 
 use Devel::Declare ();
 use PDL::NiceSlice ();
@@ -35,11 +35,11 @@ sub parser {
   my $linestr = Devel::Declare::get_linestr;
 
   # find the keyword in the current buffer
-  my ($before, $after) = split(/\b$keyword\b/, $linestr, 2);
+  # note that it ignores any keyword with a '(' after it, to ignore previously processed calls
+  my (undef, $after) = split(/\b$keyword(?!\()\b/, $linestr, 2);
 
   # find the variable after the keyword
-  my ($variable, $ws);
-  ($variable, $after, $ws) = extract_variable($after);
+  my ($variable, undef, $ws) = extract_variable($after);
   my $invocant = $keyword . $ws . $variable;
 
   # determine where to start the search for the matched braces for the slice
