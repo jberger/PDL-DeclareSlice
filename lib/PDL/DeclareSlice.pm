@@ -16,7 +16,7 @@ sub import {
   my $class = shift;
   my $opts = shift;
 
-  $verbose = $opts->{verbose} || 0;
+  $verbose = $ENV{PDL_DECLARESLICE_VERBOSE} || $opts->{verbose} || 0;
   $keyword = defined $opts->{keyword} ? $opts->{keyword} : $keyword;
 
   my $caller = caller;
@@ -55,9 +55,11 @@ sub parser {
 
   # refresh the buffer in preparation for the replacement
   $linestr = Devel::Declare::get_linestr;
+  print STDERR "Got:\n$linestr\n" if $verbose;
 
   # replace
   substr $linestr, $invocant_start, $slice_length + length $invocant, "$keyword($nslice)";
+  print STDERR "Replace:\n$linestr\n" if $verbose;
   Devel::Declare::set_linestr($linestr);
 }
 
