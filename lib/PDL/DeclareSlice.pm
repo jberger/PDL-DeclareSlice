@@ -6,6 +6,7 @@ use warnings;
 use Text::Balanced qw/extract_bracketed extract_variable/;
 
 use Devel::Declare ();
+use PDL::NiceSlice ();
 
 my $verbose = 0;
 
@@ -33,18 +34,22 @@ sub parser {
   my $linestr = Devel::Declare::get_linestr;
   my ($before, $after) = split(/\b$keyword\b/, $linestr, 2);
 
-  my $variable = extract_variable($after);
-  my $parens = extract_bracketed($after, '()');
+  my ($variable, $ws);
+  ($variable, $after, $ws) = extract_variable($after);
+  my $invocant = $keyword . $ws . $variable;
 
-  unless( $parens =~ /\"/ ) {
-    $parens =~ s/^\(/\(\"/;
-    $parens =~ s/\)$/\"\)/;
-  }
+  my $invocant_start = index( $linestr, $keyword . $ws . $variable );
 
-  my $final = $before . $keyword . '(' . $variable . '->slice' . $parens . ')' . $after;
-  print $final if $verbose;
+  my $slice_length = Devel::Declare::toke_scan_str($invocant_start + length $invocant);
+  my $slice = Devel::Declare::get_lex_stuff;
+  Devel::Declare::clear_lex_stuff;
 
-  Devel::Declare::set_linestr($final);
+  my $nslice = PDL::NiceSlice::findslice( "$variable($slice)" );
+
+  $linestr = Devel::Declare::get_linestr;
+  substr $linestr, $invocant_start, $slice_length + length $invocant, "$keyword($nslice)";
+
+  Devel::Declare::set_linestr($linestr);
 }
 
 1;
