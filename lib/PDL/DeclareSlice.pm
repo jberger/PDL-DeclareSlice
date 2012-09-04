@@ -46,7 +46,7 @@ sub make_parser {
     my $invocant = $keyword . $ws . $variable;
 
     # determine where to start the search for the matched braces for the slice
-    my $invocant_start = index( $linestr, $keyword . $ws . $variable );
+    my $invocant_start = index( $linestr, $invocant );
 
     # using D::D, load enough strings into the buffer to contain the slice
     my $slice_length = Devel::Declare::toke_scan_str($invocant_start + length $invocant);
