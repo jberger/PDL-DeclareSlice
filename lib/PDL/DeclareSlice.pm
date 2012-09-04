@@ -10,58 +10,62 @@ use PDL::NiceSlice ();
 
 my $verbose = 0;
 
-my $keyword = 'sl';
-
 sub import {
   my $class = shift;
   my $opts = shift;
 
   $verbose = $ENV{PDL_DECLARESLICE_VERBOSE} || $opts->{verbose} || 0;
-  $keyword = defined $opts->{keyword} ? $opts->{keyword} : $keyword;
+  my $keyword = defined $opts->{keyword} ? $opts->{keyword} : 'sl';
+  my $parser = make_parser($keyword);
 
   my $caller = caller;
 
   Devel::Declare->setup_for(
       $caller,
-      { $keyword => { const => \&parser } }
+      { $keyword => { const => $parser } }
   );
   no strict 'refs';
   *{$caller.'::'.$keyword} = sub : lvalue { $_[0] };
 
 }
 
-sub parser {
-  # get the current buffer
-  my $linestr = Devel::Declare::get_linestr;
+sub make_parser {
+  my $keyword = shift;
 
-  # find the keyword in the current buffer
-  # note that it ignores any keyword with a '(' after it, to ignore previously processed calls
-  my (undef, $after) = split(/\b$keyword(?!\()\b/, $linestr, 2);
+  # return a parser for the given keyword
+  return sub {
+    # get the current buffer
+    my $linestr = Devel::Declare::get_linestr;
 
-  # find the variable after the keyword
-  my ($variable, undef, $ws) = extract_variable($after);
-  my $invocant = $keyword . $ws . $variable;
+    # find the keyword in the current buffer
+    # note that it ignores any keyword with a '(' after it, to ignore previously processed calls
+    my (undef, $after) = split(/\b$keyword(?!\()\b/, $linestr, 2);
 
-  # determine where to start the search for the matched braces for the slice
-  my $invocant_start = index( $linestr, $keyword . $ws . $variable );
+    # find the variable after the keyword
+    my ($variable, undef, $ws) = extract_variable($after);
+    my $invocant = $keyword . $ws . $variable;
 
-  # using D::D, load enough strings into the buffer to contain the slice
-  my $slice_length = Devel::Declare::toke_scan_str($invocant_start + length $invocant);
-  my $slice = Devel::Declare::get_lex_stuff;
-  Devel::Declare::clear_lex_stuff;
+    # determine where to start the search for the matched braces for the slice
+    my $invocant_start = index( $linestr, $keyword . $ws . $variable );
 
-  # allow findslice to operate on a more localized region
-  my $nslice = PDL::NiceSlice::findslice( "\$dummy($slice)" );
-  $nslice =~ s/\$dummy/$variable/;
+    # using D::D, load enough strings into the buffer to contain the slice
+    my $slice_length = Devel::Declare::toke_scan_str($invocant_start + length $invocant);
+    my $slice = Devel::Declare::get_lex_stuff;
+    Devel::Declare::clear_lex_stuff;
 
-  # refresh the buffer in preparation for the replacement
-  $linestr = Devel::Declare::get_linestr;
-  print STDERR "Got:\n$linestr\n" if $verbose;
+    # allow findslice to operate on a more localized region
+    my $nslice = PDL::NiceSlice::findslice( "\$dummy($slice)" );
+    $nslice =~ s/\$dummy/$variable/;
 
-  # replace
-  substr $linestr, $invocant_start, $slice_length + length $invocant, "$keyword($nslice)";
-  print STDERR "Replace:\n$linestr\n" if $verbose;
-  Devel::Declare::set_linestr($linestr);
+    # refresh the buffer in preparation for the replacement
+    $linestr = Devel::Declare::get_linestr;
+    print STDERR "Got:\n$linestr\n" if $verbose;
+
+    # replace
+    substr $linestr, $invocant_start, $slice_length + length $invocant, "$keyword($nslice)";
+    print STDERR "Replace:\n$linestr\n" if $verbose;
+    Devel::Declare::set_linestr($linestr);
+  }
 }
 
 1;
