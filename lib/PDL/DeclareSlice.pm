@@ -51,7 +51,8 @@ sub parser {
   Devel::Declare::clear_lex_stuff;
 
   # allow findslice to operate on a more localized region
-  my $nslice = PDL::NiceSlice::findslice( "$variable($slice)" );
+  my $nslice = PDL::NiceSlice::findslice( "\$dummy($slice)" );
+  $nslice =~ s/\$dummy/$variable/;
 
   # refresh the buffer in preparation for the replacement
   $linestr = Devel::Declare::get_linestr;
