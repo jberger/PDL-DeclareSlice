@@ -14,5 +14,13 @@ ok(!$@, "Eval succeeded");
 isa_ok( $slice, 'PDL' );
 is_deeply([$slice->dims], [5], "Eval'ed slice");
 
+sl $slice(1) .= 1;
+is($slice->at(1), 1, "lvalue context");
+
+#my @array;
+#push @array, $pdl;
+#my $array_slice = sl $array[0](,(0));
+#is_deeply([$array_slice->dims], [5], "Array slice");
+
 done_testing();
 

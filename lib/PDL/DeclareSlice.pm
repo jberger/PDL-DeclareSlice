@@ -26,7 +26,7 @@ sub import {
       { $keyword => { const => \&parser } }
   );
   no strict 'refs';
-  *{$caller.'::'.$keyword} = sub {return $_[0]};
+  *{$caller.'::'.$keyword} = sub : lvalue { $_[0] };
 
 }
 
